@@ -1,30 +1,41 @@
-/*require('./models/db');
-const express=require('express');
-const path=require('path');
-const exphbs=require('express-handlebars');
-const bodyparser=require('./models/controllers/orderController');//C:\Users\Shazna\Desktop\web development project\EcoMart\models\controllers\orderController.js
-//const bodyParser = require('body-parser');
+/*// Import required modules
+const express = require('express');
+const path = require('path');
+const exphbs = require('express-handlebars');
+const bodyParser = require('body-parser');
+const orderController = require('./models/controllers/orderController'); // Import your controller
+require('./models/db'); // Import the database connection
 
-var app=express();
-app.use(bodyparser.urlencoded({
-    extended: true
-}));
+// Initialize Express application
+const app = express();
 
-app.use(bodyparser.jason());
-app.use(express.static(path.join(_dirname,'/public')));
-app.set('views',path.join(__dirname,'public'));
-app.engine('hbs',exphbs({
+// Middleware for parsing request bodies
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+
+// Middleware for serving static files
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Configure views and Handlebars engine
+app.set('views', path.join(__dirname, 'views'));
+app.engine('hbs', exphbs.create({ 
     extname: 'hbs',
     defaultLayout: 'mainLayout',
-    layoutsDir: _dirname+'/views/'
-}));
-app.set('view engine','hbs');
-app.listen(3000,()=>{
-    console.log('Server on port: 3000');
+    layoutsDir: path.join(__dirname, 'views', 'layouts')
+}).engine); // Set Handlebars engine with custom options
+
+app.set('view engine', 'hbs'); // Set view engine to Handlebars
+
+// Start the server
+app.listen(3000, () => {
+    console.log('Server is running on http://localhost:3000/');
 });
 
-app.use('/',orderController);
+// Routes
+app.use('/', orderController); // Mount orderController at root path
 
+// Export the Express app instance (if needed for testing or other purposes)
+module.exports = app;
 */
 
 require('./models/db');
