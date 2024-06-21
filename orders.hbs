@@ -1,0 +1,45 @@
+<nav class="navbar fixed-top navbar-dark navbar-expand-md bg-success text-white">
+    <a class="text-white navbar-brand" href="/">
+        <i class="fab fa-pagelines"></i> Organic Store
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" 
+        data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false"
+        aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarCollapse">
+        <ul class="navbar-nav mr-auto menu">
+            <li class="nav-item active">
+                <a href="/admin" class="nav-link">View Orders</a>
+            </li>
+        </ul> 
+    </div>
+</nav>
+<div class="container mt-5 mb-3">
+    <div class="row">
+        <div class="col">
+            <form action="/cart" class="border border-warning p-3" method="POST" autocomplete="off">
+                <input type="hidden" name="_id" value="{{order.id}}"> 
+                <div class="form-group">
+                    <label for="order">Order</label>
+                    <input type="text" class="form-control" name="order" placeholder="Order" >
+                </div>
+                <div class="form-group">
+                    <label for="total">Total</label>
+                    <input type="number" class="form-control" name="total" placeholder="Total" required>
+                </div>
+                <div class="form-group">
+                    <label for="customerName">Customer Name</label>
+                    <input type="text" class="form-control" name="customerName" placeholder="Customer Name" required>
+                </div>
+                <div class="form-group">
+                    <label for="items">Items</label>
+                    <input type="text" class="form-control" name="items" placeholder="Items" required>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-success">Submit</button>
+                </div>         
+            </form>
+        </div>
+    </div>
+</div>
