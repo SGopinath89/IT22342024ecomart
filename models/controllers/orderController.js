@@ -1,90 +1,103 @@
 const express = require('express');
-const mongoose = require('mongoose');
+const router = express.Router();
 const Order = require('../../models/order.model');
 
-var router = express.Router();
-
-router.get('/', (req, res) => {
-    res.render('menu');
+// Route to display all orders
+router.get('/admin', async (req, res) => {
+    try {
+        const orders = await Order.find().lean(); // Retrieve orders from MongoDB
+        res.render('admin', { orders }); // Render 'admin.hbs' view with orders data
+    } catch (err) {
+        console.error('Error fetching orders:', err);
+        res.status(500).send('Error fetching orders');
+    }
 });
-
-router.get('/cart', (req, res) => {
-    res.render('cart');
-});
-
+// Route to render the orders insertion form
 router.get('/orders', (req, res) => {
     res.render('orders');
 });
+// Route to render update form with order details
+router.get('/order/update/:id', async (req, res) => {
+    try {
+        const orderId = req.params.id;
+        const order = await Order.findById(orderId).lean();
 
-router.get('/admin', (req, res) => {
-    Order.find((err, docs) => {
-        if (!err) {
-            res.render("admin", {
-                order: docs
-            });
-        } else {
-            console.log('Error in order:' + err);
+        if (!order) {
+            return res.status(404).send('Order not found');
         }
-    });
+
+        res.render('updateOrder', { order }); // Render 'updateOrder.hbs' with order data
+    } catch (err) {
+        console.error('Error fetching order by ID:', err);
+        res.status(500).send('Server error');
+    }
 });
 
-router.get('/order/:id', (req, res) => {
-    Order.findById(req.params.id, (err, doc) => {
-        if (!err) {
-            res.render("orders", { order: doc });
-        } else {
-            console.log('Error findById:' + err);
+// Handle update form submission
+router.post('/order/update/:id', async (req, res) => {
+    try {
+        const orderId = req.params.id;
+        const { total, customerName, items } = req.body;
+
+        // Validate input if needed
+
+        // Find order by ID and update
+        const order = await Order.findByIdAndUpdate(orderId, {
+            total,
+            customerName,
+            items
+        }, { new: true }); // { new: true } ensures we get the updated document
+
+        if (!order) {
+            return res.status(404).send('Order not found');
         }
-    });
+
+        res.redirect('/admin'); // Redirect to admin page after update
+    } catch (err) {
+        console.error('Error updating order:', err);
+        res.status(500).send('Server error');
+    }
 });
 
-router.get('/order/delete/:id', (req, res) => {
-    Order.findByIdAndRemove(req.params.id, (err, doc) => {
-        if (!err) {
-            res.redirect('/admin');
-        } else {
-            console.log('Error in delete :' + err);
+// DELETE route to delete an order by ID
+router.get('/order/delete/:id', async (req, res) => {
+    try {
+        const orderId = req.params.id;
+
+        // Find order by ID and delete
+        const order = await Order.findByIdAndDelete(orderId);
+
+        if (!order) {
+            return res.status(404).send('Order not found');
         }
-    });
+
+        res.redirect('/admin'); // Redirect to admin page after deletion
+    } catch (err) {
+        console.error('Error deleting order:', err);
+        res.status(500).send('Server error');
+    }
 });
 
-// POST
-router.post('/cart', (req, res) => {
-    insertOrder(req, res);
+// Handle form submission for inserting a new order
+router.post('/cart', async (req, res) => {
+    try {
+        const { total, customerName, items } = req.body;
+
+        // Create a new order
+        const order = new Order({
+            total,
+            customerName,
+            items
+        });
+
+        // Save the new order to MongoDB
+        await order.save();
+
+        res.redirect('/admin'); // Redirect to admin page after insertion
+    } catch (err) {
+        console.error('Error inserting order:', err);
+        res.status(500).send('Server error');
+    }
 });
-
-router.post('/order', (req, res) => {
-    updateOrder(req, res);
-});
-
-// Functions
-function updateOrder(req, res) {
-    Order.findByIdAndUpdate(req.body._id, req.body, { new: true }, (err, doc) => {
-        if (!err) {
-            res.redirect('/admin');
-        } else {
-            console.log('Update error :' + err);
-        }
-    });
-}
-
-function insertOrder(req, res) {
-    var d = new Date();
-    var counter = d.getTime();
-    counter += 1;
-    var order = new Order({
-        total: req.body.total,
-        order: counter,
-        customerName: req.body.customerName, // Make sure to include this field in the form
-        items: req.body.items // Make sure to include this field in the form
-    });
-    order.save((err, doc) => {
-        if (!err) {
-            res.redirect('/admin');
-        } else {
-            console.log('Error insertOrder :' + err);
-        }
-    });
-}
 
 module.exports = router;
